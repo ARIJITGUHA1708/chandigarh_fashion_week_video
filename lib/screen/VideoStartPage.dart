@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:chandigarh_fasion/screen/DemoLastScreen.dart';
 import 'package:chandigarh_fasion/screen/ThankYouPage.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class VideoStartPage extends StatefulWidget {
   const VideoStartPage({super.key});
@@ -19,6 +21,7 @@ class _VideoStartPageState extends State<VideoStartPage> {
   bool _isRecording = false;
   XFile? video;
   String videoPath = "";
+  String videoFileName = "";
 
   late Future<void> _initializeControllerFuture;
   @override
@@ -53,15 +56,29 @@ class _VideoStartPageState extends State<VideoStartPage> {
   Future<void> startVideoRecording() async {
     try {
       await _initializeControllerFuture;
+      if (cameraController == null) {
+        debugPrint("Camera controller not initialized");
+        return;
+      }
+      if (!await Permission.camera.request().isGranted) {
+        debugPrint("Camera permission not granted");
+        return;
+      }
       final Directory directory = await getApplicationDocumentsDirectory();
-      final String filePath =
-          '${directory.path}/${DateTime.now().microsecondsSinceEpoch}.mp4';
+      if (directory == null) {
+        debugPrint("Unable to get application documents directory");
+        return;
+      }
+
+      // final String filePath =
+      //     '${directory.path}/${DateTime.now().microsecondsSinceEpoch}.mp4';
       await cameraController.startVideoRecording();
       setState(() {
         _isRecording = true;
-        videoPath = filePath;
-        debugPrint(videoPath);
+        // videoPath = filePath;
       });
+      debugPrint(
+          "###########################################################################################################$videoPath");
     } catch (e) {
       debugPrint("$e");
     }
@@ -69,10 +86,14 @@ class _VideoStartPageState extends State<VideoStartPage> {
 
   Future<void> stopVideoRecording() async {
     try {
-      await cameraController.stopVideoRecording();
+      final XFile videoFile = await cameraController.stopVideoRecording();
+      debugPrint(videoFile.path);
       setState(() {
         _isRecording = false;
+        videoFileName = videoFile.path;
       });
+      debugPrint(
+          "--11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111$videoPath");
     } catch (e) {
       debugPrint("$e");
     }
@@ -134,10 +155,14 @@ class _VideoStartPageState extends State<VideoStartPage> {
                           child: GestureDetector(
                         onTap: () async {
                           await stopVideoRecording();
+                          debugPrint(
+                              "--------------------dab gya button bhai-----------------------------------------------");
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const ThankYouPage(),
+                                // builder: (context) => const ThankYouPage(),
+                                builder: (context) =>
+                                    DemoLastScreen(filePath: videoFileName),
                               ));
                         },
                         child: Image.asset(
