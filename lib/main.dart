@@ -1,3 +1,4 @@
+import 'package:chandigarh_fasion/screen/ConfirmAndRetakeScreen.dart';
 import 'package:chandigarh_fasion/screen/HomePage.dart';
 import 'package:chandigarh_fasion/screen/ThankYouPage.dart';
 import 'package:chandigarh_fasion/screen/VideoStartPage.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   }
 
   // This widget is the root of your application.
@@ -29,9 +30,10 @@ class _MyAppState extends State<MyApp> {
       title: 'Chandigarh Fasion Week',
       initialRoute: "/",
       routes: {
-        '/': (context) => HomePage(),
-        //'/': (context) => const ThankYouPage(),
+        '/': (context) => const HomePage(),
+        '/thankyou': (context) => const ThankYouPage(),
         '/videostartpage': (context) => const VideoStartPage(),
+        //'/confirmpage': (context) => ConfirmAndRetakeScreen()
       },
     );
   }

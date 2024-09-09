@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:chandigarh_fasion/screen/ConfirmAndRetakeScreen.dart';
 import 'package:chandigarh_fasion/screen/DemoLastScreen.dart';
 import 'package:chandigarh_fasion/screen/ThankYouPage.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +20,6 @@ class _VideoStartPageState extends State<VideoStartPage> {
   late CameraController cameraController;
   bool _inCameraInitialized = false;
   bool _isRecording = false;
-  XFile? video;
-  String videoPath = "";
   String videoFileName = "";
 
   late Future<void> _initializeControllerFuture;
@@ -55,30 +54,12 @@ class _VideoStartPageState extends State<VideoStartPage> {
 
   Future<void> startVideoRecording() async {
     try {
-      await _initializeControllerFuture;
-      if (cameraController == null) {
-        debugPrint("Camera controller not initialized");
-        return;
+      if (cameraController.value.isInitialized) {
+        await cameraController.startVideoRecording();
+        setState(() {
+          _isRecording = true;
+        });
       }
-      if (!await Permission.camera.request().isGranted) {
-        debugPrint("Camera permission not granted");
-        return;
-      }
-      final Directory directory = await getApplicationDocumentsDirectory();
-      if (directory == null) {
-        debugPrint("Unable to get application documents directory");
-        return;
-      }
-
-      // final String filePath =
-      //     '${directory.path}/${DateTime.now().microsecondsSinceEpoch}.mp4';
-      await cameraController.startVideoRecording();
-      setState(() {
-        _isRecording = true;
-        // videoPath = filePath;
-      });
-      debugPrint(
-          "###########################################################################################################$videoPath");
     } catch (e) {
       debugPrint("$e");
     }
@@ -86,14 +67,13 @@ class _VideoStartPageState extends State<VideoStartPage> {
 
   Future<void> stopVideoRecording() async {
     try {
-      final XFile videoFile = await cameraController.stopVideoRecording();
-      debugPrint(videoFile.path);
-      setState(() {
-        _isRecording = false;
-        videoFileName = videoFile.path;
-      });
-      debugPrint(
-          "--11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111$videoPath");
+      if (_isRecording) {
+        final XFile videoFile = await cameraController.stopVideoRecording();
+        setState(() {
+          _isRecording = false;
+          videoFileName = videoFile.path;
+        });
+      }
     } catch (e) {
       debugPrint("$e");
     }
@@ -116,7 +96,7 @@ class _VideoStartPageState extends State<VideoStartPage> {
           children: [
             startCameraCondition
                 ? Positioned(
-                    child: Container(
+                    child: SizedBox(
                     width: size.width,
                     height: size.height,
                     child: CameraPreview(cameraController),
@@ -124,6 +104,7 @@ class _VideoStartPageState extends State<VideoStartPage> {
                 : Positioned(
                     child: Image.asset(
                     "assets/images/previewImg.png",
+                    fit: BoxFit.cover,
                     height: size.height,
                     width: size.width,
                   )),
@@ -149,21 +130,28 @@ class _VideoStartPageState extends State<VideoStartPage> {
             startCameraCondition
                 ? Positioned(
                     bottom: size.width * 0.15,
-                    child: Container(
+                    child: SizedBox(
                       width: size.width,
                       child: Center(
                           child: GestureDetector(
                         onTap: () async {
                           await stopVideoRecording();
-                          debugPrint(
-                              "--------------------dab gya button bhai-----------------------------------------------");
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                // builder: (context) => const ThankYouPage(),
-                                builder: (context) =>
-                                    DemoLastScreen(filePath: videoFileName),
-                              ));
+                                  builder: (context) => ConfirmAndRetakeScreen(
+                                      videoPath: videoFileName)));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //       builder: (context) =>
+                          //           DemoLastScreen(filePath: videoFileName),
+                          //     ));
+                          // Navigator.pushAndRemoveUntil(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => const ThankYouPage()),
+                          //     (Route<dynamic> route) => false);
                         },
                         child: Image.asset(
                           "assets/images/stop.png",
@@ -173,7 +161,7 @@ class _VideoStartPageState extends State<VideoStartPage> {
                     ))
                 : Positioned(
                     bottom: size.width * 0.15,
-                    child: Container(
+                    child: SizedBox(
                       width: size.width,
                       child: Center(
                           child: GestureDetector(

@@ -21,9 +21,6 @@ class _DemoLastScreenState extends State<DemoLastScreen> {
       ..initialize().then((_) {
         setState(() {});
       });
-    debugPrint(widget.filePath);
-    debugPrint(
-        "...................................................................................................");
   }
 
   @override
@@ -35,18 +32,31 @@ class _DemoLastScreenState extends State<DemoLastScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-      decoration: BoxDecoration(border: Border.all(width: 1)),
-      // height: 100,
-      // width: 100,
-      child: Center(
-        child: _controller.value.isInitialized
-            ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              )
-            : const CircularProgressIndicator(),
+      body: Container(
+        decoration: BoxDecoration(border: Border.all(width: 1)),
+        child: Center(
+          child: _controller.value.isInitialized
+              ? AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                )
+              : const CircularProgressIndicator(),
+        ),
       ),
-    ));
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            if (_controller.value.isPlaying) {
+              _controller.pause();
+            } else {
+              _controller.play();
+            }
+          });
+        },
+        child: Icon(
+          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+        ),
+      ),
+    );
   }
 }
